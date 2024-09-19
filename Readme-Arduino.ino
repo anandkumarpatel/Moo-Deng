@@ -13,10 +13,16 @@ bool waterDone = false;
 const int soundPin = 2;
 bool soundDone = false;
 const int coinPin = 8;
+
+const int movePin = 10;
+bool isMoving = false;
+bool moveDone = false;
+
 void setup() {
   Serial.begin(9600);
   pinMode(trigPin, OUTPUT);
   pinMode(echoPin, INPUT);
+  pinMode(movePin, INPUT);
   pinMode(coinPin, INPUT_PULLUP);
   Keyboard.begin();
 }
@@ -33,14 +39,14 @@ void loop() {
   int temperature = analogRead(tempPin);
   // Serial.print("temperature: ");
   // Serial.println(temperature);
-  if (temperature <= TARGET_TEMPERATURE) {
+  if (!tempDone && temperature <= TARGET_TEMPERATURE) {
     tempDone = true;
     Serial.println("temp reached");
   }
   int waterLevel = analogRead(waterPin);
   // Serial.print("waterLevel: ");
   // Serial.println(waterLevel);
-  if (waterLevel <= TARGET_WATER_LEVEL) {
+  if (!waterDone && waterLevel <= TARGET_WATER_LEVEL) {
     waterDone = true;
     Serial.println("water reached");
   } else {
@@ -53,13 +59,28 @@ void loop() {
   } else {
     soundDone = false;
   }
-  if (tempDone && waterDone && soundDone) {
+
+  int moveVal = digitalRead(movePin);  
+  if (moveVal == HIGH) {  
+    if (isMoving == false) { 
+      Serial.println("Motion detected");  
+      isMoving = true;
+      moveDone = true;
+    } 
+  } else { 
+    if (isMoving){ 
+      Serial.println("The motion has stopped"); 
+      isMoving = false;  
+    } 
+  } 
+
+  if (moveDone && tempDone && waterDone && soundDone) {
     Keyboard.write(10);
     Serial.println("konami");
     tempDone = false;
     waterDone = false;
     soundDone = false;
-    delay(10000);
+    delay(30000);
     Serial.println("konami done");
   }
 }
