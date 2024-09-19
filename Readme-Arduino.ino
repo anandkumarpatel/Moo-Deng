@@ -39,7 +39,6 @@ void loop() {
     Keyboard.write(32);
     Serial.println("space");
     isGameStart = true;
-    digitalWrite(led1, HIGH);
     delay(1000);
    }
 
@@ -80,6 +79,7 @@ void loop() {
 
 
   if (!lightDone) {
+    digitalWrite(led1, HIGH);
     int lightValue = analogRead(lightPin);
     if (lightValue < TARGET_LIGHT) {
     lightDone = true;
@@ -94,6 +94,7 @@ void loop() {
     waterDone = false;
     soundDone = false;
     lightDone = false;
+    digitalWrite(led1, LOW);
     delay(30000);
     Serial.println("konami done");
   }
