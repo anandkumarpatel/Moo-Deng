@@ -1,67 +1,65 @@
 #include <Keyboard.h>
-#include <IRremote.h>
-
 const int trigPin = 9;
 const int echoPin = 10;
-float duration, distance;
 bool isGameStart = false;
-
-
+const int TARGET_DISTANCE = 10;
+const int DISTANCE_DELTA = 2;
+const int TARGET_TEMPERATURE = 420;
+const int TARGET_WATER_LEVEL = 150;
 const int tempPin = A5;
-
+bool tempDone = false;
 const int waterPin = A0;
-
+bool waterDone = false;
 const int soundPin = 2;
-
+bool soundDone = false;
+const int coinPin = 8;
 void setup() {
-  // make pin 2 an input and turn on the
-  // pullup resistor so it goes high unless
-  // connected to ground:
-
-  Serial.begin(9600); 
+  Serial.begin(9600);
   pinMode(trigPin, OUTPUT);
   pinMode(echoPin, INPUT);
-
-  pinMode(5, INPUT_PULLUP);
+  pinMode(coinPin, INPUT_PULLUP);
   Keyboard.begin();
 }
-
 void loop() {
-  //if the button is pressed
-  if (!isGameStart && digitalRead(5) == LOW) {
-    //Send an ASCII '<space>',
-    Keyboard.write(32);
+  if (!isGameStart && digitalRead(coinPin) == LOW) {
+    // Keyboard.write(32);
     Serial.println("space");
     isGameStart = true;
-   delay(100);
-   
-
+    delay(100);
+   }
+  if(!isGameStart) {
+    return;
   }
-
-if(!isGameStart) {
-  return;
-}
-
-  digitalWrite(trigPin, LOW);
-  delayMicroseconds(2);
-  digitalWrite(trigPin, HIGH);
-  delayMicroseconds(10);
-  digitalWrite(trigPin, LOW);
-
-  duration = pulseIn(echoPin, HIGH);
-  distance = (duration*.0343)/2; // cm
-  Serial.print("Distance: ");
-  Serial.println(distance);
-  delay(100);
-
-  Serial.println(analogRead(tempPin));
-  Serial.println(analogRead(waterPin));
-  
-  if(digitalRead(soundPin) == HIGH){
-  Serial.println("sound");
-delay(100);
+  int temperature = analogRead(tempPin);
+  // Serial.print("temperature: ");
+  // Serial.println(temperature);
+  if (temperature <= TARGET_TEMPERATURE) {
+    tempDone = true;
+    Serial.println("temp reached");
   }
-
-
-
+  int waterLevel = analogRead(waterPin);
+  // Serial.print("waterLevel: ");
+  // Serial.println(waterLevel);
+  if (waterLevel <= TARGET_WATER_LEVEL) {
+    waterDone = true;
+    Serial.println("water reached");
+  } else {
+    waterDone = false;
+  }
+  int soundHeard = digitalRead(soundPin);
+  if(soundHeard == HIGH){
+    Serial.println("sound");
+    soundDone = true;
+  } else {
+    soundDone = false;
+  }
+  if (tempDone && waterDone && soundDone) {
+    Keyboard.write(10);
+    Serial.println("konami");
+    tempDone = false;
+    waterDone = false;
+    soundDone = false;
+    delay(10000);
+    Serial.println("konami done");
+  }
 }
