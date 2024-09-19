@@ -52,6 +52,7 @@ void loop() {
     // Serial.println(temperature);
     if (temperature <= TARGET_TEMPERATURE) {
       tempDone = true;
+      digitalWrite(led1, HIGH);
       Serial.println("temp reached");
     }
   }
@@ -79,10 +80,9 @@ void loop() {
 
 
   if (!lightDone) {
-    digitalWrite(led1, HIGH);
     int lightValue = analogRead(lightPin);
     if (lightValue < TARGET_LIGHT) {
-    lightDone = true;
+      lightDone = true;
       Serial.println("light reached");
     }
   }
